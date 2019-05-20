@@ -16,6 +16,8 @@ public class GameObjects {
 
     public GameObjects(ImageView textView, int offSetX, int offSetY){
         this.imageView = textView;
+        imageView.setX(offSetX);
+        imageView.setY(offSetY);
     }
 
     public int getSpeedX() {
@@ -27,7 +29,8 @@ public class GameObjects {
     }
 
     public boolean intersect(int birdY){
-        return 0 <= getCenterX() && getCenterX() <= birdSize && birdY <= getCenterY() && getCenterY() <= birdY + birdSize;
+
+        return (0 <= getCenterX() && getCenterX() <= birdSize && birdY <= getCenterY() && getCenterY() <= birdY + birdSize);
     }
 
     public int getCenterY(){

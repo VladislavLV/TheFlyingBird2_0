@@ -12,8 +12,7 @@ public class Pink extends GameObjects {
     }
 
     public void update(){
-        setPosX(getPosX() -20);
-        setPosY((int) (Math.sin(getPosX() * 0.01) * 500 + 500));
+        setPosX(getPosX() -15);
 
         if (getPosX() < 0) {
             setPosX(screenWidth + 5000);

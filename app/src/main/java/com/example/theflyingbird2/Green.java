@@ -12,7 +12,7 @@ public class Green extends GameObjects {
     }
 
     public void update(){
-        setPosX(getPosX() -30);
+        setPosX(getPosX() -25);
 
         if (getPosX() < 0) {
             setPosX(screenWidth + 10000);

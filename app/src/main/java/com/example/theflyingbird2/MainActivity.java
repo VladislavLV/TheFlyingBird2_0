@@ -178,6 +178,8 @@ public class MainActivity extends AppCompatActivity {
             frameHeight = frame.getHeight();
 
             mBird.setPosY((int)mBird.getImageView().getY());
+            birdSize = mBird.getImageView().getHeight();
+
 
             startLabel.setVisibility(View.GONE);
 

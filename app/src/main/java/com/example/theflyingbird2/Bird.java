@@ -7,6 +7,8 @@ import static com.example.theflyingbird2.MainActivity.frameHeight;
 
 public class Bird extends GameObjects {
 
+
+
     public Bird(ImageView textView, int offSetX, int offSetY) {
         super(textView, offSetX, offSetY);
     }
