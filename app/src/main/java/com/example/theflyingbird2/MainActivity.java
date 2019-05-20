@@ -19,6 +19,7 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    private FrameLayout frame;
     private TextView scoreLabel;
     private TextView startLabel;
     private ImageView bird;
@@ -29,23 +30,17 @@ public class MainActivity extends AppCompatActivity {
     private ImageView green;
 
     //Size
-    private int frameHeight;
-    private int birdSize;
-    private int screenWidth;
-    private int screenHeight;
+    public static int frameHeight;
+    public static int birdSize;
+    public static int screenWidth;
+    public static int screenHeight;
 
-    //Position
-    private int birdY;
-    private int orangeX;
-    private int orangeY;
-    private int blackX;
-    private int blackY;
-    private int bigBlackX;
-    private int bigBlackY;
-    private int pinkX;
-    private int pinkY;
-    private int greenX;
-    private int greenY;
+    private Orange mOrange;
+    private Green mGreen;
+    private Pink mPink;
+    private Black mBlack;
+    private BigBlack mBigBlack;
+    private Bird mBird;
 
     //Score
     private int score = 0;
@@ -65,8 +60,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sound = new SoundPlayer(this);
+        getViews();
+        //Get screen size
+        getDeviceScreenSize();
 
+        createObjects();
+
+        scoreLabel.setText("Score : 0");
+    }
+
+    private void createObjects() {
+        sound = new SoundPlayer(this);
+        mOrange = new Orange(orange,-80,-80);
+        mGreen = new Green(green,-80,-80);
+        mBigBlack = new BigBlack(bigBlack,-130,-130);
+        mBlack = new Black(black,-80,-80);
+        mPink = new Pink(pink,-80,-80);
+        mBird = new Bird(bird,0,0);
+    }
+
+    private void getDeviceScreenSize() {
+        WindowManager windowManager = getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        screenWidth = size.x;
+        screenHeight = size.y;
+    }
+
+    private void getViews() {
+        frame = (FrameLayout) findViewById(R.id.frame);
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
         startLabel = (TextView) findViewById(R.id.startLabel);
         bird = (ImageView) findViewById(R.id.bird);
@@ -75,98 +99,23 @@ public class MainActivity extends AppCompatActivity {
         bigBlack = (ImageView) findViewById(R.id.bigBlack);
         pink = (ImageView) findViewById(R.id.pink);
         green = (ImageView) findViewById(R.id.green);
-
-        //Get screen size
-        WindowManager windowManager = getWindowManager();
-        Display display = windowManager.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-
-        screenWidth = size.x;
-        screenHeight = size.y;
-
-        //move to out of screen
-        orange.setX(-80);
-        orange.setY(-80);
-        black.setX(-80);
-        black.setY(-80);
-        bigBlack.setX(-130);
-        bigBlack.setY(-130);
-        pink.setX(-80);
-        pink.setY(-80);
-        green.setX(-80);
-        green.setY(-80);
-
-        scoreLabel.setText("Score : 0");
     }
 
     public void changePos() {
 
         hitCheck();
 
-        //Orange
-        orangeX -= 10;
+        mOrange.update();
 
-        if (orangeX < 0) {
-            orangeX = screenWidth + 20;
-            orangeY = (int) Math.floor(Math.random() * (frameHeight - orange.getHeight()));
-        }
-        orange.setX(orangeX);
-        orange.setY(orangeY);
+        mBlack.update();
 
-        //Black
-        blackX -= (16 + Math.random() * 9);
-        if (blackX < 0) {
-            blackX = screenWidth + 10;
-            blackY = (int) Math.floor(Math.random() * (frameHeight - black.getHeight()));
-        }
-        black.setX(blackX);
-        black.setY(blackY);
+        mBigBlack.update();
 
-        //BigBlack
-        bigBlackX -= 10;
-        bigBlackY = (int) (Math.sin(bigBlackX * 0.01) * 500 + 500);
-        if (bigBlackX < 0) {
-            bigBlackX = screenWidth + 2500;
-            bigBlackY = (int) Math.floor(Math.random() * (frameHeight - bigBlack.getHeight()));
-        }
-        bigBlack.setX(bigBlackX);
-        bigBlack.setY(bigBlackY);
+        mPink.update();
 
-        //Pink
-        pinkX -= 20;
-        if (pinkX < 0) {
-            pinkX = screenWidth + 5000;
-            pinkY = (int) Math.floor(Math.random() * (frameHeight - pink.getHeight()));
-        }
-        pink.setX(pinkX);
-        pink.setY(pinkY);
+        mGreen.update();
 
-        //Green
-        greenX -= 30;
-        if (greenX < 0) {
-            greenX = screenWidth + 10000;
-            greenY = (int) Math.floor(Math.random() * (frameHeight - green.getHeight()));
-        }
-        green.setX(greenX);
-        green.setY(greenY);
-
-        //Move bird
-        if (action_flag == true) {
-            //Touching
-            birdY -= 20;
-        } else {
-            //Releasing
-            birdY += 20;
-        }
-
-        //Check bird position
-        if (birdY < 0)
-            birdY = 0;
-
-        if (birdY > frameHeight - birdSize)
-            birdY = frameHeight - birdSize;
-        bird.setY(birdY);
+        mBird.update(action_flag);
 
         scoreLabel.setText("Score : " + score);
         sound.playBirdSound();
@@ -175,22 +124,13 @@ public class MainActivity extends AppCompatActivity {
     public void hitCheck() {
 
         //If center of the ball is in the bird, it counts as a hit.
-        //Orange
-        int orangeCenterX = orangeX + orange.getWidth() / 2;
-        int orangeCenterY = orangeY + orange.getHeight() / 2;
-
-        if (0 <= orangeCenterX && orangeCenterX <= birdSize && birdY <= orangeCenterY && orangeCenterY <= birdY + birdSize) {
+        if(mOrange.intersect(mBird.getPosY())){
             score += 10;
-            orangeX -= 100;
+            mOrange.setPosX(mOrange.getPosX() - 100);
             sound.playHitSound();
         }
 
-        //Black
-        int blackCenterX = blackX + black.getWidth() / 2;
-        int blackCenterY = blackY + black.getHeight() / 2;
-
-        if (0 <= blackCenterX && blackCenterX <= birdSize && birdY <= blackCenterY && blackCenterY <= birdY + birdSize) {
-
+        if (mBlack.intersect(mBird.getPosY())){
             //Stop Timer
             timer.cancel();
             timer = null;
@@ -203,12 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        //BigBlack
-        int bigBlackCenterX = bigBlackX + bigBlack.getWidth() / 2;
-        int bigBlackCenterY = bigBlackY + bigBlack.getHeight() / 2;
-
-        if (0 <= bigBlackCenterX && bigBlackCenterX <= birdSize && birdY <= bigBlackCenterY && bigBlackCenterY <= birdY + birdSize) {
-
+        if(mBigBlack.intersect(mBird.getPosY())){
             //Stop Timer
             timer.cancel();
             timer = null;
@@ -221,23 +156,15 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        //Pink
-        int pinkCenterX = pinkX + pink.getWidth() / 2;
-        int pinkCenterY = pinkY + pink.getHeight() / 2;
-
-        if (0 <= pinkCenterX && pinkCenterX <= birdSize && birdY <= pinkCenterY && pinkCenterY <= birdY + birdSize) {
+        if(mPink.intersect(mBird.getPosY())){
             score += 25;
-            pinkX -= 100;
+            mPink.setPosX(mPink.getPosX() - 100);
             sound.playHitSound();
         }
 
-        //Green
-        int greenCenterX = pinkX + pink.getWidth() / 2;
-        int greenCenterY = pinkY + pink.getHeight() / 2;
-
-        if (0 <= greenCenterX && greenCenterX <= birdSize && birdY <= greenCenterY && greenCenterY <= birdY + birdSize) {
+        if(mGreen.intersect(mBird.getPosY())){
             score += 50;
-            greenX -= 100;
+            mGreen.setPosX(mGreen.getPosX() - 100);
             sound.playHitSound();
         }
     }
@@ -248,12 +175,9 @@ public class MainActivity extends AppCompatActivity {
         if (start_flag == false) {
 
             start_flag = true;
-
-            FrameLayout frame = (FrameLayout) findViewById(R.id.frame);
             frameHeight = frame.getHeight();
 
-            birdY = (int) bird.getY();
-            birdSize = bird.getHeight();
+            mBird.setPosY((int)mBird.getImageView().getY());
 
             startLabel.setVisibility(View.GONE);
 
